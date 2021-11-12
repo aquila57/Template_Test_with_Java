@@ -1,0 +1,15 @@
+## Installation
+
+To install the Java programs in this repository,
+
+Edit your environmental variable, $PATH,
+to include a path to your Java development kit (JDK).
+
+chmod 700 *.sh
+
+inst.sh
+
+To de-install the Java programs in this repository,
+
+deinst.sh
+
