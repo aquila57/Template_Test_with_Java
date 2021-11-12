@@ -324,15 +324,6 @@ public class Template
 		int status;
 		for (i=0;i<samples;i++)
 		   {
-			if (i == 500000)
-			   {
-				int parm[] = new int[8];
-				parm[0] = 1;
-				parm[1] = 2;
-				parm[2] = 3;
-				Etaus et = new Etaus();
-				et.strt(parm);
-				} // if half way taking samples
 		   popActual();
 			num = et.genbit();
 		   pushActual(num);
