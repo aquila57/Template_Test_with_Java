@@ -72,5 +72,5 @@ procedure.  There are no parameters.
 
 sintest.sh
 
-The output should be an failed chi square test.
+The output should be a failed chi square test.
 

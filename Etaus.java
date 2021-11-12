@@ -53,6 +53,7 @@ public class Etaus
    private static int pprev;       // prev prev output state
    // state array of 1024 members
    private static int state[] = new int[states];
+   private static double maxint;   // 2^31
 
 	Etaus()
 	   {
@@ -61,6 +62,7 @@ public class Etaus
 		s1 = 123456789;
 		s2 = s1 + 17;
 		s3 = s1 + 31;
+		maxint = 65536.0 * 32768.0;    // 2^31
 		} // constructor
 
    // There are three parts to the Tausworthe algorithm
@@ -107,6 +109,7 @@ public class Etaus
    public static int gen()
 	   {
 		int tmp;
+		ofst = pprev >>> 18;
 		pprev = prev;
 		prev  = out;
 		one();
@@ -118,7 +121,6 @@ public class Etaus
 		// The offset into the state array is 14 bits
 		// There are 16384 (2^14) elements in the state array
 		//****************************************************
-		ofst = pprev >>> 18;
 		tmp = out;
 		out = state[ofst];
 		state[ofst] = tmp;
@@ -147,12 +149,10 @@ public class Etaus
 	   {
 		int i;
 		double frac;
-		double maxint;
-		maxint = 65536.0 * 32768.0;
 		i = gen();
 		frac = (double) i;
 		if (frac < 0.0) frac = -frac;
-		frac = frac / maxint;
+		frac = frac / maxint;      // 31 bit fraction
 		return(frac);
 		} // genunif
 
@@ -174,10 +174,10 @@ public class Etaus
 			   frac = frac * 0.5;
 				frac = frac + 0.5;
 				} // if greater than zero
-			else if (j < 0)
+			else
 			   {
 			   frac = frac * 0.5;
-				} // else if less than zero
+				} // else if <= zero
 			} // for each bit in mantissa
 		return(frac);
 		} // genfrac
@@ -272,7 +272,7 @@ public class Etaus
 	// three input parameters for s1,s2,s3
 	// respectively
 	// the input parameter is an array of three
-	// seeds of type long
+	// seeds of type int
 
    public static void strt(int seed[])
 	   {

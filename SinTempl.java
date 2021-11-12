@@ -63,9 +63,13 @@ public class SinTempl
    private double prob   = 0.5;      // probability of no match
 	// currProb[i+1] = currProb[i] * prob;
    private double currProb = prob;
-	// number of sample queues actually matched
+   // indexed by number of nodes in the sample queues
+   // actually matched
+   // tally of sample queues actually matched
    private double actual[] = new double[sizePlus];
-	// expected number of sample queues matched
+   // also indexed by number of nodes in the sample queues
+   // actually matched
+   // expected number of nodes in the sample queues to be matched
    private double expected[] = new double[sizePlus];
 	//************************************************************
 	// The following are the head and tail nodes for
@@ -75,6 +79,7 @@ public class SinTempl
    private Node tmplTail = new Node();
    private Node actHead  = new Node();
    private Node actTail  = new Node();
+   // random number generator internal state
    private Etaus et = new Etaus();    // etaus class instance
 
 	SinTempl()
@@ -108,7 +113,8 @@ public class SinTempl
 		parm[2] = prm;
 		System.out.print("Seed 3 ");
 		System.out.println(Integer.toHexString(prm));
-		Etaus et = new Etaus();
+      // Initialize random number generator
+      // to three random seeds.
 		et.strt(parm);
 		//********************************************************
 		// Initialize template and actual, head and tail
@@ -122,7 +128,7 @@ public class SinTempl
 		actHead.key   = 88888;
 		actTail.key   = 22222;
 		//********************************************************
-		// Calculate expected matches
+      // Calculate array of expected matches
 		// currProb is initialized to prob.
 		//********************************************************
 		for (i=0;i<sizePlus;i++)
@@ -170,11 +176,11 @@ public class SinTempl
 		} // pushActual
 
    // remove the least recently added node
-	// in the template queue
+	// from the tail of the template queue
 
    public void popTemplate()
 	   {
-		// the new, least recently added, node is
+		// least recently added node is
 		// called the first node
 		Node first = tmplTail.next;
 		tmplTail.next = first.next;
@@ -182,11 +188,11 @@ public class SinTempl
 		} // popTemplate
 
    // remove the least recently added node
-	// in the sample queue
+	// from the tail of the sample queue
 
    public void popActual()
 	   {
-		// the new, least recently added, node is
+		// least recently added node is
 		// called the first node
 		Node first = actTail.next;
 		actTail.next = first.next;
@@ -270,7 +276,9 @@ public class SinTempl
    // count the number of matches, left to right, of
 	// the sample queue against the template queue
 	// return the actual number of matches in the
-	// oldest side of the queue
+	// least recent tail of the queue
+   // If the number of matches, left to right,
+   // is 1024, then a wrap-around error is generated.
 
    public int match()
 		{
@@ -302,7 +310,7 @@ public class SinTempl
 				System.out.println("template node missing");
 				return(0);
 				} // if no corresponding template node
-			// comparison ends at the firat non-match
+         // comparison ends at the first non-match
 			if (currActual.key != currTemplate.key)
 			   {
 				break;
@@ -311,19 +319,27 @@ public class SinTempl
 			currActual   = currActual.next;
 			currTemplate = currTemplate.next;
 			} // for each actual node
+      if (tally >= size)
+         {
+         System.out.print("match: ");
+         System.out.println("wrap-around error");
+         } // if wrap-around error
 		return(tally);   // #matches left to right
 	   } // match
 
    // generate one million rolling sample queues.
-	// pop the oldest sample
+	// pop the least recent sample
 	// push the newest sample
 	// match the new queue
+   // return zero if no wrap-around error
+   // return one  if    wrap-around error
 
-   public void takeSamples()
+   public int takeSamples()
 	   {
 		int i;
 		int num;
-		int count;
+		int count = 0;
+      int status;
 		double x;
 		double y;
 		for (i=0;i<samples;i++)
@@ -344,8 +360,20 @@ public class SinTempl
 				} // else y < 0.5
 		   pushActual(num);
 		   count = match();
+         if (count >= size)
+            {
+            System.out.print("Sample # ");
+            System.out.println(i + 1);
+            break;
+            } // if wrap-around error
 		   actual[count] += 1.0;
 			} // for each sample queue
+      status = 0;
+      if (count >= size)
+         {
+         status = 1;
+         } // if wrap-around error
+      return(status);
 		} // takeSamples
 
    // Print the heading on the chi square report.
@@ -366,6 +394,8 @@ public class SinTempl
 		System.out.println("Chi Square");
 		} // printHeading
 
+   // Calculate the chi square of actual nodes matched
+
    public void calcChisq()
 	   {
 		int i;
@@ -376,7 +406,7 @@ public class SinTempl
 		// initialize totals
 		chisq = 0.0;
 		df    = 0.0;
-		// a valid chi square test had ten or more
+		// a valid chi square test has ten or more
 		// expected tallies
 		i = 0;
 		while (expected[i] >= 10.0)
@@ -401,12 +431,16 @@ public class SinTempl
 	public static void main(String arg[])
 	   {
 		int num;
+		int status;
 		SinTempl tmpl = new SinTempl();
 		tmpl.bldTemplate();
 		tmpl.bldActual();
-		tmpl.takeSamples();
-		tmpl.printHeading();
-		tmpl.calcChisq();
+		status = tmpl.takeSamples();
+		if (status == 0)
+		   {
+		   tmpl.printHeading();
+		   tmpl.calcChisq();
+			} // if no wrap-around error
 		} // main
 
 	} // class SinTempl
