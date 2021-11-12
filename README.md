@@ -40,7 +40,7 @@ procedure.  There are no parameters.
 
 tmpl.sh
 
-The output should be a valis chi square test.
+The output should be a valid chi square test.
 
 ## WrapTmpl.java
 
@@ -61,7 +61,7 @@ The output should be a wrap-around error message.
 ## SinTempl.java
 
 SinTempl.java is the same template test applied to a
-modifies etaus random number generator.  One million
+modified etaus random number generator.  One million
 samples are taken in this test, but the samples do not
 follow a uniform distribution.  The purpose of this
 test is to show how a non-uniform random number generator
@@ -72,5 +72,5 @@ procedure.  There are no parameters.
 
 sintest.sh
 
-The output should be an invalid chi square test.
+The output should be an failed chi square test.
 
